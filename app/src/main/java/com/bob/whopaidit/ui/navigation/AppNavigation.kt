@@ -11,8 +11,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.bob.whopaidit.ui.screen.DashboardScreen
 import com.bob.whopaidit.ui.screen.ForgotPasswordScreen
-import com.bob.whopaidit.ui.screen.HomeScreen
 import com.bob.whopaidit.ui.screen.LoginScreen
 import com.bob.whopaidit.ui.screen.SignupScreen
 import com.bob.whopaidit.ui.screen.SplashScreen
@@ -179,7 +179,7 @@ fun AppNavigation(
             val userName = firebaseUser?.displayName.orEmpty().ifEmpty { "User" }
             val userEmail = firebaseUser?.email.orEmpty()
 
-            HomeScreen(
+            DashboardScreen(
                 userName = userName,
                 userEmail = userEmail,
                 onLogoutClick = {
