@@ -6,4 +6,10 @@ object Routes {
     const val SIGNUP = "signup"
     const val FORGOT_PASSWORD = "forgot_password"
     const val HOME = "home"
+
+    // Dashboard inner tab routes
+    const val DASHBOARD_HOME = "dashboard_home"
+    const val DASHBOARD_GROUPS = "dashboard_groups"
+    const val DASHBOARD_ACTIVITY = "dashboard_activity"
+    const val DASHBOARD_PROFILE = "dashboard_profile"
 }
