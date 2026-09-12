@@ -2,6 +2,8 @@ package com.bob.whopaidit.ui.navigation
 
 import android.widget.Toast
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -9,12 +11,13 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.bob.whopaidit.viewModel.AuthViewModel
 import com.bob.whopaidit.ui.screen.ForgotPasswordScreen
 import com.bob.whopaidit.ui.screen.HomeScreen
 import com.bob.whopaidit.ui.screen.LoginScreen
 import com.bob.whopaidit.ui.screen.SignupScreen
 import com.bob.whopaidit.ui.screen.SplashScreen
+import com.bob.whopaidit.viewModel.AuthState
+import com.bob.whopaidit.viewModel.AuthViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
@@ -24,6 +27,12 @@ fun AppNavigation(
     authViewModel: AuthViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
+    val authState by authViewModel.authState.collectAsState()
+    val savedEmail by authViewModel.savedEmail.collectAsState()
+    val savedPassword by authViewModel.savedPassword.collectAsState()
+    val rememberMe by authViewModel.rememberMe.collectAsState()
+
+    val isLoading = authState is AuthState.Loading
 
     NavHost(
         navController = navController,
@@ -46,6 +55,10 @@ fun AppNavigation(
 
         composable(Routes.LOGIN) {
             LoginScreen(
+                savedEmailPref = savedEmail,
+                savedPasswordPref = savedPassword,
+                rememberMePref = rememberMe,
+                isLoading = isLoading,
                 onLoginClick = { email, password, isRememberMeChecked ->
                     authViewModel.login(
                         email = email,
