@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "248964821045",
+    "project_id": "whopaidit",
+    "storage_bucket": "whopaidit.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:248964821045:android:d339c8a934e825610b817c",
+        "android_client_info": {
+          "package_name": "com.bob.whopaidit"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "248964821045-df4n94qt2gvejuifan58bij9vjdnuur0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAC07Rh42rdN-KNX4pDH0wH4DZ604BUFEk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "248964821045-df4n94qt2gvejuifan58bij9vjdnuur0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
