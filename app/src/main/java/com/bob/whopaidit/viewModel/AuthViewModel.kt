@@ -1,14 +1,18 @@
-package com.bob.whopaidit.ui.auth
+package com.bob.whopaidit.viewModel
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bob.whopaidit.data.model.User
 import com.bob.whopaidit.data.repository.AuthRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 sealed interface AuthState {
     data object Idle : AuthState
@@ -17,12 +21,31 @@ sealed interface AuthState {
     data class Error(val message: String) : AuthState
 }
 
-class AuthViewModel(
-    private val repository: AuthRepository = AuthRepository(),
+@HiltViewModel
+class AuthViewModel @Inject constructor(
+    private val repository: AuthRepository,
 ) : ViewModel() {
 
     private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)
     val authState: StateFlow<AuthState> = _authState.asStateFlow()
+
+    val savedEmail: StateFlow<String> = repository.userPreferences.savedEmail.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = "",
+    )
+
+    val savedPassword: StateFlow<String> = repository.userPreferences.savedPassword.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = "",
+    )
+
+    val rememberMe: StateFlow<Boolean> = repository.userPreferences.rememberMe.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = false,
+    )
 
     fun isUserLoggedIn(): Boolean = repository.isUserLoggedIn()
 
@@ -57,6 +80,7 @@ class AuthViewModel(
     fun login(
         email: String,
         password: String,
+        rememberMe: Boolean = false,
         onSuccess: (User) -> Unit = {},
         onError: (String) -> Unit = {},
     ) {
@@ -70,6 +94,7 @@ class AuthViewModel(
         viewModelScope.launch {
             _authState.value = AuthState.Loading
             try {
+                repository.userPreferences.saveRememberMe(email, password, rememberMe)
                 val user = repository.login(email, password)
                 _authState.value = AuthState.Success(user)
                 onSuccess(user)

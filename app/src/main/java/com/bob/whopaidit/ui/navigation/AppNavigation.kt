@@ -4,12 +4,12 @@ import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.bob.whopaidit.ui.auth.AuthViewModel
+import com.bob.whopaidit.viewModel.AuthViewModel
 import com.bob.whopaidit.ui.screen.ForgotPasswordScreen
 import com.bob.whopaidit.ui.screen.HomeScreen
 import com.bob.whopaidit.ui.screen.LoginScreen
@@ -21,7 +21,7 @@ import com.google.firebase.auth.FirebaseAuth
 fun AppNavigation(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    authViewModel: AuthViewModel = viewModel(),
+    authViewModel: AuthViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
 
@@ -46,10 +46,11 @@ fun AppNavigation(
 
         composable(Routes.LOGIN) {
             LoginScreen(
-                onLoginClick = { email, password ->
+                onLoginClick = { email, password, isRememberMeChecked ->
                     authViewModel.login(
                         email = email,
                         password = password,
+                        rememberMe = isRememberMeChecked,
                         onSuccess = { user ->
                             Toast.makeText(
                                 context,
