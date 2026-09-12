@@ -2,17 +2,13 @@ package com.bob.whopaidit.ui.screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -35,6 +31,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import com.bob.whopaidit.R
 import com.bob.whopaidit.ui.theme.WhoPaidItTheme
 
@@ -64,46 +62,65 @@ fun HomeScreen(
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState()),
         ) {
-            // Top Toolbar
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
+            // Main ConstraintLayout container for Header, Greeting, Balance Card, Buttons & Section Title
+            ConstraintLayout(
+                modifier = Modifier.fillMaxWidth(),
             ) {
-                // Circular Profile Image View & App Name at Start
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.clickable { onProfileClick() },
+                val (
+                    profileAvatar,
+                    appName,
+                    notificationIcon,
+                    greetingText,
+                    summarySubtitle,
+                    balanceCard,
+                    addExpenseBtn,
+                    settleUpBtn,
+                    recentExpensesHeader,
+                ) = createRefs()
+
+                // Profile Avatar Icon
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+                        .clickable { onProfileClick() }
+                        .constrainAs(profileAvatar) {
+                            top.linkTo(parent.top)
+                            start.linkTo(parent.start)
+                        },
+                    contentAlignment = Alignment.Center,
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_person),
-                            contentDescription = "Circular Profile Image",
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(24.dp),
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(12.dp))
-
-                    Text(
-                        text = "WhoPaidIt",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary,
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_person),
+                        contentDescription = "Profile Image",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(24.dp),
                     )
                 }
 
-                // Notification Icon at End
-                IconButton(onClick = onNotificationClick) {
+                // App Name
+                Text(
+                    text = "WhoPaidIt",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.constrainAs(appName) {
+                        start.linkTo(profileAvatar.end, margin = 12.dp)
+                        top.linkTo(profileAvatar.top)
+                        bottom.linkTo(profileAvatar.bottom)
+                    },
+                )
+
+                // Notification Icon Button
+                IconButton(
+                    onClick = onNotificationClick,
+                    modifier = Modifier.constrainAs(notificationIcon) {
+                        end.linkTo(parent.end)
+                        top.linkTo(profileAvatar.top)
+                        bottom.linkTo(profileAvatar.bottom)
+                    },
+                ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_notifications),
                         contentDescription = "Notifications",
@@ -111,96 +128,137 @@ fun HomeScreen(
                         modifier = Modifier.size(24.dp),
                     )
                 }
-            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                // Greeting Header
+                Text(
+                    text = "Hello, $userName! 👋",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.constrainAs(greetingText) {
+                        top.linkTo(profileAvatar.bottom, margin = 16.dp)
+                        start.linkTo(parent.start)
+                    },
+                )
 
-            // Greeting Sub-Header
-            Text(
-                text = "Hello, $userName! 👋",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground,
-            )
-            Text(
-                text = "Here's your expense summary",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.outline,
-            )
+                // Summary Subtitle
+                Text(
+                    text = "Here's your expense summary",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.outline,
+                    modifier = Modifier.constrainAs(summarySubtitle) {
+                        top.linkTo(greetingText.bottom, margin = 2.dp)
+                        start.linkTo(parent.start)
+                    },
+                )
 
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // Balance Summary Card
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-            ) {
-                Column(
-                    modifier = Modifier.padding(20.dp),
+                // Balance Summary Card
+                Card(
+                    modifier = Modifier.constrainAs(balanceCard) {
+                        top.linkTo(summarySubtitle.bottom, margin = 20.dp)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                        width = Dimension.fillToConstraints
+                    },
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
                 ) {
-                    Text(
-                        text = "Total Outstanding Balance",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "+ ₹1,450.00",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimary,
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-                    HorizontalDivider(color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f))
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ConstraintLayout(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp),
                     ) {
-                        Column {
-                            Text(
-                                text = "You are owed",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
-                            )
-                            Text(
-                                text = "₹2,100.00",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onPrimary,
-                            )
-                        }
+                        val (
+                            balanceLabel,
+                            balanceValue,
+                            divider,
+                            youAreOwedLabel,
+                            youAreOwedValue,
+                            youOweLabel,
+                            youOweValue,
+                        ) = createRefs()
 
-                        Column(horizontalAlignment = Alignment.End) {
-                            Text(
-                                text = "You owe",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
-                            )
-                            Text(
-                                text = "₹650.00",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onPrimary,
-                            )
-                        }
+                        Text(
+                            text = "Total Outstanding Balance",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
+                            modifier = Modifier.constrainAs(balanceLabel) {
+                                top.linkTo(parent.top)
+                                start.linkTo(parent.start)
+                            },
+                        )
+
+                        Text(
+                            text = "+ ₹1,450.00",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.constrainAs(balanceValue) {
+                                top.linkTo(balanceLabel.bottom, margin = 4.dp)
+                                start.linkTo(parent.start)
+                            },
+                        )
+
+                        HorizontalDivider(
+                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f),
+                            modifier = Modifier.constrainAs(divider) {
+                                top.linkTo(balanceValue.bottom, margin = 16.dp)
+                                start.linkTo(parent.start)
+                                end.linkTo(parent.end)
+                                width = Dimension.fillToConstraints
+                            },
+                        )
+
+                        // You are owed section
+                        Text(
+                            text = "You are owed",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
+                            modifier = Modifier.constrainAs(youAreOwedLabel) {
+                                top.linkTo(divider.bottom, margin = 16.dp)
+                                start.linkTo(parent.start)
+                            },
+                        )
+
+                        Text(
+                            text = "₹2,100.00",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.constrainAs(youAreOwedValue) {
+                                top.linkTo(youAreOwedLabel.bottom, margin = 2.dp)
+                                start.linkTo(parent.start)
+                            },
+                        )
+
+                        // You owe section
+                        Text(
+                            text = "You owe",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
+                            modifier = Modifier.constrainAs(youOweLabel) {
+                                top.linkTo(divider.bottom, margin = 16.dp)
+                                end.linkTo(parent.end)
+                            },
+                        )
+
+                        Text(
+                            text = "₹650.00",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.constrainAs(youOweValue) {
+                                top.linkTo(youOweLabel.bottom, margin = 2.dp)
+                                end.linkTo(parent.end)
+                            },
+                        )
                     }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // Quick Action Buttons
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
+                // Add Expense Button
                 Button(
                     onClick = onAddExpenseClick,
                     shape = RoundedCornerShape(12.dp),
@@ -208,8 +266,13 @@ fun HomeScreen(
                         containerColor = MaterialTheme.colorScheme.primary,
                     ),
                     modifier = Modifier
-                        .weight(1f)
-                        .height(48.dp),
+                        .height(48.dp)
+                        .constrainAs(addExpenseBtn) {
+                            top.linkTo(balanceCard.bottom, margin = 20.dp)
+                            start.linkTo(parent.start)
+                            end.linkTo(settleUpBtn.start, margin = 6.dp)
+                            width = Dimension.fillToConstraints
+                        },
                 ) {
                     Text(
                         text = "+ Add Expense",
@@ -218,6 +281,7 @@ fun HomeScreen(
                     )
                 }
 
+                // Settle Up Button
                 Button(
                     onClick = onSettleUpClick,
                     shape = RoundedCornerShape(12.dp),
@@ -225,8 +289,13 @@ fun HomeScreen(
                         containerColor = MaterialTheme.colorScheme.tertiary,
                     ),
                     modifier = Modifier
-                        .weight(1f)
-                        .height(48.dp),
+                        .height(48.dp)
+                        .constrainAs(settleUpBtn) {
+                            top.linkTo(balanceCard.bottom, margin = 20.dp)
+                            start.linkTo(addExpenseBtn.end, margin = 6.dp)
+                            end.linkTo(parent.end)
+                            width = Dimension.fillToConstraints
+                        },
                 ) {
                     Text(
                         text = "Settle Up",
@@ -234,21 +303,21 @@ fun HomeScreen(
                         fontWeight = FontWeight.Bold,
                     )
                 }
+
+                // Recent Expenses Section Header
+                Text(
+                    text = "Recent Expenses",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.constrainAs(recentExpensesHeader) {
+                        top.linkTo(addExpenseBtn.bottom, margin = 24.dp)
+                        start.linkTo(parent.start)
+                    },
+                )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Recent Expenses Header
-            Text(
-                text = "Recent Expenses",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground,
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Recent Expenses List
+            // Recent Expenses Items List
             val sampleExpenses = listOf(
                 ExpenseItem("Dinner at Bistro", "Paid by you • Split with 4", "₹1,200.00", "Today, 8:30 PM"),
                 ExpenseItem("Grocery Shopping", "Paid by Alex • You owe ₹350", "₹700.00", "Today, 4:15 PM"),
@@ -263,7 +332,6 @@ fun HomeScreen(
                     amount = item.amount,
                     time = item.time,
                 )
-                Spacer(modifier = Modifier.height(8.dp))
             }
         }
     }
@@ -277,67 +345,90 @@ fun ExpenseItemRow(
     time: String = "Today, 8:30 PM",
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface,
         ),
     ) {
-        Row(
+        ConstraintLayout(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.weight(1f),
+            val (walletIcon, titleText, subtitleText, amountText, timeText) = createRefs()
+
+            // Wallet Icon Container
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                    .constrainAs(walletIcon) {
+                        start.linkTo(parent.start)
+                        top.linkTo(parent.top)
+                        bottom.linkTo(parent.bottom)
+                    },
+                contentAlignment = Alignment.Center,
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_wallet),
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(20.dp),
-                    )
-                }
-                Spacer(modifier = Modifier.width(12.dp))
-                Column {
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.SemiBold,
-                    )
-                    Text(
-                        text = subtitle,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.outline,
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Column(horizontalAlignment = Alignment.End) {
-                Text(
-                    text = amount,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-                Text(
-                    text = time,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.outline,
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_wallet),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp),
                 )
             }
+
+            // Expense Title
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.constrainAs(titleText) {
+                    start.linkTo(walletIcon.end, margin = 12.dp)
+                    top.linkTo(parent.top)
+                    end.linkTo(amountText.start, margin = 8.dp)
+                    width = Dimension.fillToConstraints
+                },
+            )
+
+            // Expense Subtitle
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.outline,
+                modifier = Modifier.constrainAs(subtitleText) {
+                    start.linkTo(titleText.start)
+                    top.linkTo(titleText.bottom, margin = 2.dp)
+                    end.linkTo(amountText.start, margin = 8.dp)
+                    width = Dimension.fillToConstraints
+                },
+            )
+
+            // Amount Text
+            Text(
+                text = amount,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.constrainAs(amountText) {
+                    end.linkTo(parent.end)
+                    top.linkTo(parent.top)
+                },
+            )
+
+            // Time Text
+            Text(
+                text = time,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.outline,
+                modifier = Modifier.constrainAs(timeText) {
+                    end.linkTo(parent.end)
+                    top.linkTo(amountText.bottom, margin = 2.dp)
+                },
+            )
         }
     }
 }
