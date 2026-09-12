@@ -1,0 +1,121 @@
+package com.bob.whopaidit.data.repository
+
+import android.content.Context
+import androidx.credentials.CredentialManager
+import androidx.credentials.GetCredentialRequest
+import com.bob.whopaidit.R
+import com.bob.whopaidit.data.model.User
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.auth.UserProfileChangeRequest
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
+
+class AuthRepository(
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
+    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance(),
+) {
+
+    fun getCurrentUserId(): String? = auth.currentUser?.uid
+
+    fun isUserLoggedIn(): Boolean = auth.currentUser != null
+
+    suspend fun signUp(fullName: String, email: String, password: String): User {
+        val authResult = auth.createUserWithEmailAndPassword(email.trim(), password).await()
+        val firebaseUser = authResult.user ?: throw Exception("User creation failed")
+
+        val profileUpdates = UserProfileChangeRequest.Builder()
+            .setDisplayName(fullName.trim())
+            .build()
+        firebaseUser.updateProfile(profileUpdates).await()
+
+        val user = User(
+            uid = firebaseUser.uid,
+            fullName = fullName.trim(),
+            email = email.trim(),
+            createdAt = System.currentTimeMillis(),
+        )
+
+        saveUserToFirestore(user)
+        return user
+    }
+
+    suspend fun login(email: String, password: String): User {
+        val authResult = auth.signInWithEmailAndPassword(email.trim(), password).await()
+        val firebaseUser = authResult.user ?: throw Exception("Authentication failed")
+
+        return fetchUserFromFirestore(firebaseUser.uid) ?: run {
+            val user = User(
+                uid = firebaseUser.uid,
+                fullName = firebaseUser.displayName ?: "",
+                email = firebaseUser.email ?: email.trim(),
+                createdAt = System.currentTimeMillis(),
+            )
+            saveUserToFirestore(user)
+            user
+        }
+    }
+
+    suspend fun sendPasswordResetEmail(email: String) {
+        auth.sendPasswordResetEmail(email.trim()).await()
+    }
+
+    suspend fun signInWithGoogle(context: Context): User {
+        val webClientId = context.getString(R.string.default_web_client_id)
+        val googleIdOption = GetGoogleIdOption.Builder()
+            .setFilterByAuthorizedAccounts(filterByAuthorizedAccounts = false)
+            .setServerClientId(webClientId)
+            .setAutoSelectEnabled(autoSelectEnabled = false)
+            .build()
+
+        val request = GetCredentialRequest.Builder()
+            .addCredentialOption(googleIdOption)
+            .build()
+
+        val credentialManager = CredentialManager.create(context)
+        val result = credentialManager.getCredential(context = context, request = request)
+
+        val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(result.credential.data)
+        val idToken = googleIdTokenCredential.idToken
+
+        val firebaseCredential = GoogleAuthProvider.getCredential(idToken, null)
+        val authResult = auth.signInWithCredential(firebaseCredential).await()
+        val firebaseUser = authResult.user ?: throw Exception("Google Authentication failed")
+
+        val user = User(
+            uid = firebaseUser.uid,
+            fullName = firebaseUser.displayName ?: googleIdTokenCredential.displayName ?: "",
+            email = firebaseUser.email ?: googleIdTokenCredential.id,
+            createdAt = System.currentTimeMillis(),
+        )
+
+        saveUserToFirestore(user)
+        return user
+    }
+
+    private suspend fun saveUserToFirestore(user: User) {
+        firestore.collection("users")
+            .document(user.uid)
+            .set(user)
+            .await()
+    }
+
+    private suspend fun fetchUserFromFirestore(uid: String): User? {
+        val snapshot = firestore.collection("users")
+            .document(uid)
+            .get()
+            .await()
+
+        return if (snapshot.exists()) {
+            snapshot.toObject(User::class.java)
+        } else {
+            null
+        }
+    }
+
+    fun logout() {
+        auth.signOut()
+    }
+}
