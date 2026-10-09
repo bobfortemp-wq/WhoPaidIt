@@ -70,11 +70,10 @@ fun AppTextField(
     val borderColor = when {
         isError -> MaterialTheme.colorScheme.error
         isFocused -> MaterialTheme.colorScheme.primary
-        else -> MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)
+        else -> MaterialTheme.colorScheme.outline
     }
 
     Column(modifier = modifier) {
-        // Label displayed JUST ABOVE the textfield
         if (!label.isNullOrBlank()) {
             Text(
                 text = label,
@@ -83,21 +82,20 @@ fun AppTextField(
                 color = if (isError) {
                     MaterialTheme.colorScheme.error
                 } else {
-                    MaterialTheme.colorScheme.onBackground
+                    MaterialTheme.colorScheme.onSurfaceVariant
                 },
                 modifier = Modifier.padding(bottom = 6.dp),
             )
         }
 
-        // BasicTextField Container Box
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(52.dp)
-//                .background(
-//                    color = MaterialTheme.colorScheme.surface,
-//                    shape = RoundedCornerShape(12.dp),
-//                )
+                .background(
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    shape = RoundedCornerShape(12.dp),
+                )
                 .border(
                     width = if (isFocused || isError) 1.5.dp else 1.dp,
                     color = borderColor,
@@ -110,13 +108,11 @@ fun AppTextField(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                // Leading Icon
                 if (leadingIcon != null) {
                     leadingIcon()
                     Spacer(modifier = Modifier.padding(start = 10.dp))
                 }
 
-                // Core BasicTextField
                 Box(
                     modifier = Modifier.weight(1f),
                     contentAlignment = Alignment.CenterStart,
@@ -125,7 +121,7 @@ fun AppTextField(
                         Text(
                             text = placeholder,
                             style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.7f),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                         )
                     }
 
@@ -151,7 +147,6 @@ fun AppTextField(
                     )
                 }
 
-                // Trailing Icon or Password Visibility Toggle
                 val effectiveTrailingIcon: @Composable (() -> Unit)? = when {
                     isPassword -> {
                         {
@@ -168,7 +163,7 @@ fun AppTextField(
                                         },
                                     ),
                                     contentDescription = if (isPasswordVisible) "Hide Password" else "Show Password",
-                                    tint = MaterialTheme.colorScheme.outline,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
                         }
@@ -185,7 +180,6 @@ fun AppTextField(
             }
         }
 
-        // Error Message Helper Text
         if (isError && !errorMessage.isNullOrBlank()) {
             Text(
                 text = errorMessage,
@@ -207,7 +201,6 @@ fun AppTextFieldPreview() {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            // Name Field
             AppTextField(
                 value = "",
                 onValueChange = {},
@@ -216,7 +209,6 @@ fun AppTextFieldPreview() {
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
             )
 
-            // Email Field
             AppTextField(
                 value = "john@example.com",
                 onValueChange = {},
@@ -226,6 +218,7 @@ fun AppTextFieldPreview() {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_email),
                         contentDescription = "Email Icon",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 },
                 keyboardOptions = KeyboardOptions(
@@ -234,7 +227,6 @@ fun AppTextFieldPreview() {
                 ),
             )
 
-            // Password Field
             AppTextField(
                 value = "secret123",
                 onValueChange = {},
@@ -244,6 +236,7 @@ fun AppTextFieldPreview() {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_lock),
                         contentDescription = "Lock Icon",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 },
                 isPassword = true,

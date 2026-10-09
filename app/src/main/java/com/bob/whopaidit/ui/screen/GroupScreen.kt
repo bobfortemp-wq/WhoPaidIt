@@ -12,7 +12,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -23,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.bob.whopaidit.R
 import com.bob.whopaidit.ui.theme.WhoPaidItTheme
 
 @Composable
@@ -30,6 +30,8 @@ fun GroupScreen(
     modifier: Modifier = Modifier,
     onCreateGroupClick: () -> Unit = {},
 ) {
+    val groups = emptyList<Triple<String, String, String>>()
+
     Surface(
         modifier = modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background,
@@ -49,55 +51,24 @@ fun GroupScreen(
                     text = "Your Groups",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground,
                 )
                 Button(
                     onClick = onCreateGroupClick,
-                    shape = RoundedCornerShape(8.dp),
+                    shape = RoundedCornerShape(999.dp),
                 ) {
-                    Text("+ New Group", fontSize = 12.sp)
+                    Text("+ New Group", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            val groups = listOf(
-                Triple("Trip to Goa", "4 Members", "You get back ₹1,200"),
-                Triple("Flat 402 Rent & Bills", "3 Members", "You owe ₹650"),
-                Triple("Weekend Party", "6 Members", "Settled up"),
-            )
-
-            groups.forEach { (name, members, balance) ->
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 6.dp),
-                    shape = RoundedCornerShape(12.dp),
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            text = name,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                        ) {
-                            Text(
-                                text = members,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.outline,
-                            )
-                            Text(
-                                text = balance,
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.primary,
-                            )
-                        }
-                    }
-                }
+            if (groups.isEmpty()) {
+                EmptyStateCard(
+                    iconRes = R.drawable.ic_groups,
+                    title = "No Active Groups",
+                    description = "Tap + New Group to start splitting with friends & family",
+                )
             }
         }
     }

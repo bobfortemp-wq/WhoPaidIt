@@ -45,13 +45,17 @@ fun DashboardScreen(
     userName: String = "User",
     userEmail: String = "user@example.com",
     onLogoutClick: () -> Unit = {},
+    onNewTripClick: () -> Unit = {},
+    onJoinTripClick: () -> Unit = {},
+    onTripClick: (TripItem) -> Unit = {},
     dashboardNavController: NavHostController = rememberNavController(),
 ) {
     var selectedTab by remember { mutableStateOf(DashboardTab.HOME) }
     val isPreview = LocalInspectionMode.current
 
     val navBackStackEntry by dashboardNavController.currentBackStackEntryAsState()
-    val currentRoute = if (isPreview) selectedTab.route else (navBackStackEntry?.destination?.route ?: Routes.DASHBOARD_HOME)
+    val currentRoute = if (isPreview) selectedTab.route else (navBackStackEntry?.destination?.route
+        ?: Routes.DASHBOARD_HOME)
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -109,7 +113,13 @@ fun DashboardScreen(
         ) {
             if (isPreview) {
                 when (selectedTab) {
-                    DashboardTab.HOME -> HomeScreen(userName = userName)
+                    DashboardTab.HOME -> HomeScreen(
+                        userName = userName,
+                        onNewTripClick = onNewTripClick,
+                        onJoinTripClick = onJoinTripClick,
+                        onTripClick = onTripClick,
+                    )
+
                     DashboardTab.GROUPS -> GroupScreen()
                     DashboardTab.ACTIVITY -> ActivityScreen()
                     DashboardTab.PROFILE -> ProfileScreen(
@@ -124,7 +134,12 @@ fun DashboardScreen(
                     startDestination = Routes.DASHBOARD_HOME,
                 ) {
                     composable(Routes.DASHBOARD_HOME) {
-                        HomeScreen(userName = userName)
+                        HomeScreen(
+                            userName = userName,
+                            onNewTripClick = onNewTripClick,
+                            onJoinTripClick = onJoinTripClick,
+                            onTripClick = onTripClick,
+                        )
                     }
                     composable(Routes.DASHBOARD_GROUPS) {
                         GroupScreen()

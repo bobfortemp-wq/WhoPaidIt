@@ -1,56 +1,36 @@
 package com.bob.whopaidit.ui.theme
 
-import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Primary,
-    secondary = Secondary,
-    tertiary = Tertiary,
-    surface = Neutral,
-    outline = Neutral,
-    onPrimary = Color.White,
-    onSecondary = Color(0xFF1C1B1F),
-    onTertiary = Color.White,
-)
-
-private val LightColorScheme = lightColorScheme(
-    primary = Primary,
-    secondary = Secondary,
-    tertiary = Tertiary,
-    surface = Secondary,
-    outline = Neutral,
-    onPrimary = Color.White,
-    onSecondary = Color(0xFF1C1B1F),
-    onTertiary = Color.White,
+    primary = PrimaryAccent,
+    onPrimary = OnPrimaryAccent,
+    primaryContainer = PrimaryAccentActive,
+    onPrimaryContainer = OnPrimaryAccent,
+    secondary = SurfaceLevel1,
+    onSecondary = ContentPrimary,
+    tertiary = StatusInfo,
+    onTertiary = OnPrimaryAccent,
+    background = BaseBackground,
+    onBackground = ContentPrimary,
+    surface = SurfaceLevel1,
+    onSurface = ContentPrimary,
+    surfaceVariant = SurfaceLevel2,
+    onSurfaceVariant = ContentSecondary,
+    outline = DividerStroke,
+    outlineVariant = StrokeMuted,
+    error = StatusNegative,
+    onError = OnPrimaryAccent,
 )
 
 @Composable
 fun WhoPaidItTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = false,
     content: @Composable () -> Unit,
 ) {
-    val colorScheme = when {
-        dynamicColor && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
-
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = DarkColorScheme,
         typography = Typography,
         content = content,
     )
